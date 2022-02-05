@@ -1,0 +1,57 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in/screens/welcome_screen.dart';
+
+class FirebaseService {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  Future<String?> signInwithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleSignInAccount =
+      await _googleSignIn.signIn();
+      final GoogleSignInAuthentication googleSignInAuthentication =
+      await googleSignInAccount!.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+      await _auth.signInWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      print(e.message);
+      throw e;
+    }
+  }
+
+  Future<void> signOutFromGoogle(BuildContext context) async{
+    await _googleSignIn.signOut();
+    await _auth.signOut();
+    Navigator.push(context,MaterialPageRoute(builder: (context)=>WelcomeScreen()));
+  }
+}
+
+
+
+
+FirebaseService service = new FirebaseService();
+              try {
+                await service.signInwithGoogle();
+                // Navigator.pushNamedAndRemoveUntil(context,HomePage, (route) => false);
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
+              } catch(e){
+                if(e is FirebaseAuthException){
+                 print(e);
+                }
+              }
+
+
+keytool -list -v -alias androiddebugkey -keystore %USERPROFILE%/.android/debug.keystore
+
+
+
+firebase_auth: ^1.2.0
+  firebase_core: ^1.2.0
+  font_awesome_flutter: ^9.0.0
+  google_sign_in: ^5.0.3
